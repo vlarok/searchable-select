@@ -22,6 +22,7 @@ defmodule SearchableSelect do
   multiple - True=multiple options may be selected, False=only one option may be select - optional, defaults to `false`
   options - List of maps or structs to use as options - required
   parent_key - Key to send to parent view when options are selected/unselected - required
+  placeholder - Placeholder for the search input, defaults to "Search"
   """
   @impl true
   def update(assigns, socket) do
@@ -31,6 +32,7 @@ defmodule SearchableSelect do
       |> assign(:label_key, assigns[:label_key] || :name)
       |> assign(:multiple, assigns[:multiple] || false)
       |> prep_options(assigns)
+      |> assign(:placeholder, assigns[:placeholder] || "Search")
       |> assign(:search, "")
       |> assign(:parent_key, assigns.parent_key)
       |> assign(:selected, :gb_trees.empty())

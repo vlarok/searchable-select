@@ -22,7 +22,7 @@
 
         <div class="flex-1">
           <input
-            placeholder={if !@multiple and length(@selected_list) > 0, do: "", else: "Search"}
+            placeholder={if !@multiple and length(@selected_list) > 0, do: "", else: @placeholder}
             class="bg-transparent py-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
             id={"#{@id}-search"}
             phx-click={show_dropdown(%JS{}, @id)}
