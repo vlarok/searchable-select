@@ -10,6 +10,7 @@ defmodule SearchableSelect.SearchableSelectTest do
   test "renders all options on load", %{live: live} do
     Enum.each(1..4, fn i -> assert has_element?(live, "#multi-option-#{i}") end)
     Enum.each(1..4, fn i -> assert has_element?(live, "#single-option-#{i}") end)
+    Enum.each(1..4, fn i -> assert has_element?(live, "#dropdown-option-#{i}") end)
   end
 
   test "search filters items in dropdown", %{live: live} do
@@ -44,6 +45,19 @@ defmodule SearchableSelect.SearchableSelectTest do
 
     assert live |> element("#selected-options") |> render() ==
              "<span id=\"selected-options\">[1, 2]</span>"
+  end
+
+  test "no change to options or selection if dropdown=true", %{live: live} do
+    live |> element("#dropdown-option-1") |> render_click()
+    live |> element("#dropdown-option-2") |> render_click()
+
+    refute has_element?(live, "#dropdown-pop-cross-1")
+    refute has_element?(live, "#dropdown-pop-cross-2")
+    assert has_element?(live, "#dropdown-option-1")
+    assert has_element?(live, "#dropdown-option-2")
+
+    assert live |> element("#selected-options") |> render() ==
+             "<span id=\"selected-options\">2</span>"
   end
 
   test "selection is replaced instead of appended if multiple=false", %{live: live} do
