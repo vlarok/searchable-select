@@ -17,6 +17,7 @@ defmodule SearchableSelect do
   end
 
   @doc """
+  class - Classes to apply to outermost div, defaults to ""
   dropdown - True=selection doesn't persist after click, so behaves like a dropdown instead of a select - optional, defaults to `false`
   id - Component id - required
   label_key - Map/struct key to use as label when displaying items - optional, defaults to `:name`
@@ -29,6 +30,7 @@ defmodule SearchableSelect do
   def update(assigns, socket) do
     socket =
       socket
+      |> assign(:class, assigns[:class] || "")
       |> assign(:dropdown, assigns[:dropdown] || false)
       |> assign(:id, assigns.id)
       |> assign(:label_key, assigns[:label_key] || :name)

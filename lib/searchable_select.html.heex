@@ -1,53 +1,51 @@
-<div class="flex flex-col items-center relative">
-  <div class="w-full">
-    <div class="p-1 flex border border-gray-300 bg-white rounded">
-      <div class="flex flex-auto flex-wrap align-middle items-center">
-        <%= if @multiple do %>
-          <!-- selection pills -->
-          <%= for {_, selected_val} = selected <- @selected_list do %>
-            <div class="flex justify-center items-center m-1 font-medium py-1 px-1 bg-white rounded bg-gray-100 border">
-              <div class="text-xs font-normal leading-none max-w-full flex-initial">
-                <%= Map.get(selected_val, @label_key) %>
-              </div>
-              <.pop_cross component_id={@id} selected={selected} target={@myself} />
+<div class={"flex flex-col w-fit items-center relative #{@class}"}>
+  <div class="p-1 flex border border-gray-300 bg-white rounded">
+    <div class="flex flex-auto flex-wrap align-middle items-center">
+      <%= if @multiple do %>
+        <!-- selection pills -->
+        <%= for {_, selected_val} = selected <- @selected_list do %>
+          <div class="flex justify-center items-center m-1 font-medium py-1 px-1 bg-white rounded bg-gray-100 border">
+            <div class="text-xs font-normal leading-none max-w-full flex-initial">
+              <%= Map.get(selected_val, @label_key) %>
             </div>
-          <% end %>
-        <% else %>
-          <%= unless @selected_list == [] do %>
-            <span class="py-1 px-2">
-              <%= Map.get(@selected_list |> List.first() |> elem(1), @label_key) %>
-            </span>
-          <% end %>
+            <.pop_cross component_id={@id} selected={selected} target={@myself} />
+          </div>
         <% end %>
-
-        <div class="flex-1">
-          <input
-            placeholder={if !@multiple and length(@selected_list) > 0, do: "", else: @placeholder}
-            class="bg-transparent py-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
-            id={"#{@id}-search"}
-            phx-click={show_dropdown(%JS{}, @id)}
-            phx-keyup={JS.push("search", target: @myself) |> show_dropdown(@id)}
-            phx-target={@myself}
-          />
-        </div>
-      </div>
-
-      <%= unless @multiple or @selected_list == [] do %>
-        <.pop_cross component_id={@id} selected={List.first(@selected_list)} target={@myself} />
+      <% else %>
+        <%= unless @selected_list == [] do %>
+          <span class="py-1 px-2">
+            <%= Map.get(@selected_list |> List.first() |> elem(1), @label_key) %>
+          </span>
+        <% end %>
       <% end %>
-      <!-- dropdown caret -->
-      <div class="text-gray-300 w-8 py-1 pl-2 pr-1 flex items-center">
-        <svg
-          version="1.1"
-          id={"#{@id}-caret"}
-          phx-click={toggle_dropdown(@id)}
-          class="fill-current h-4 w-4 my-auto text-black"
-          role="button"
-          viewBox="0 0 20 20"
-        >
-          <path d="M17.418,6.109c0.272-0.268,0.709-0.268,0.979,0s0.271,0.701,0,0.969l-7.908,7.83 c-0.27,0.268-0.707,0.268-0.979,0l-7.908-7.83c-0.27-0.268-0.27-0.701,0-0.969c0.271-0.268,0.709-0.268,0.979,0L10,13.25 L17.418,6.109z" />
-        </svg>
+
+      <div class="flex-1">
+        <input
+          placeholder={if !@multiple and length(@selected_list) > 0, do: "", else: @placeholder}
+          class="bg-transparent py-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
+          id={"#{@id}-search"}
+          phx-click={show_dropdown(%JS{}, @id)}
+          phx-keyup={JS.push("search", target: @myself) |> show_dropdown(@id)}
+          phx-target={@myself}
+        />
       </div>
+    </div>
+
+    <%= unless @multiple or @selected_list == [] do %>
+      <.pop_cross component_id={@id} selected={List.first(@selected_list)} target={@myself} />
+    <% end %>
+    <!-- dropdown caret -->
+    <div class="text-gray-300 w-8 py-1 pl-2 pr-1 flex items-center">
+      <svg
+        version="1.1"
+        id={"#{@id}-caret"}
+        phx-click={toggle_dropdown(@id)}
+        class="fill-current h-4 w-4 my-auto text-black"
+        role="button"
+        viewBox="0 0 20 20"
+      >
+        <path d="M17.418,6.109c0.272-0.268,0.709-0.268,0.979,0s0.271,0.701,0,0.969l-7.908,7.83 c-0.27,0.268-0.707,0.268-0.979,0l-7.908-7.83c-0.27-0.268-0.27-0.701,0-0.969c0.271-0.268,0.709-0.268,0.979,0L10,13.25 L17.418,6.109z" />
+      </svg>
     </div>
   </div>
 
@@ -73,7 +71,7 @@
         <% else %>
           <%= for {option_key, option_val} <- @visible_options do %>
             <div
-              class="overflow-auto"
+              class="overflow-none"
               id={"#{@id}-option-#{Map.get(option_val, :id)}"}
               phx-click={selection_action(option_key, @myself, @id, @multiple)}
             >
