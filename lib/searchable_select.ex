@@ -17,20 +17,24 @@ defmodule SearchableSelect do
   end
 
   @doc """
+  dropdown - True=selection doesn't persist after click, so behaves like a dropdown instead of a select - optional, defaults to `false`
   id - Component id - required
   label_key - Map/struct key to use as label when displaying items - optional, defaults to `:name`
   multiple - True=multiple options may be selected, False=only one option may be select - optional, defaults to `false`
   options - List of maps or structs to use as options - required
   parent_key - Key to send to parent view when options are selected/unselected - required
+  placeholder - Placeholder for the search input, defaults to "Search"
   """
   @impl true
   def update(assigns, socket) do
     socket =
       socket
+      |> assign(:dropdown, assigns[:dropdown] || false)
       |> assign(:id, assigns.id)
       |> assign(:label_key, assigns[:label_key] || :name)
       |> assign(:multiple, assigns[:multiple] || false)
       |> prep_options(assigns)
+      |> assign(:placeholder, assigns[:placeholder] || "Search")
       |> assign(:search, "")
       |> assign(:parent_key, assigns.parent_key)
       |> assign(:selected, :gb_trees.empty())
@@ -62,6 +66,16 @@ defmodule SearchableSelect do
     socket
     |> assign(:search, search)
     |> assign(:visible_options, filter(options, search))
+    |> then(&{:noreply, &1})
+  end
+
+  def handle_event("select", %{"key" => key}, %{assigns: %{dropdown: true} = assigns} = socket) do
+    %{options: options, parent_key: parent_key} = assigns
+    val = :gb_trees.get(key, options)
+    send(self(), {:select, parent_key, val})
+
+    socket
+    |> assign(:search, "")
     |> then(&{:noreply, &1})
   end
 

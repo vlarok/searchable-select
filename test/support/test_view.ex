@@ -47,6 +47,13 @@ defmodule SearchableSelect.TestView do
       options={@options}
       parent_key="selected_options"
     />
+    <.live_component
+      dropdown
+      id="dropdown"
+      module={SearchableSelect}
+      options={@options}
+      parent_key="selected_options"
+    />
     <span id="selected-options"><%= get_selected_id_list(@selected_options) %></span>
     """
   end
