@@ -110,7 +110,7 @@ defmodule SearchableSelect do
     ~H"""
     <svg
       class="fill-current h-4 w-4 my-auto"
-      id={"#{@component_id}-pop-cross-#{@selected |> elem(1) |> Map.get(:id)}"}
+      id={if Mix.env() == :test, do: "#{@component_id}-pop-cross-#{@selected |> elem(1) |> Map.get(:id)}", else: nil}
       role="button"
       viewBox="0 0 20 20"
       phx-click="pop"
@@ -120,6 +120,12 @@ defmodule SearchableSelect do
       <path d="M14.348,14.849c-0.469,0.469-1.229,0.469-1.697,0L10,11.819l-2.651,3.029c-0.469,0.469-1.229,0.469-1.697,0 c-0.469-0.469-0.469-1.229,0-1.697l2.758-3.15L5.651,6.849c-0.469-0.469-0.469-1.228,0-1.697s1.228-0.469,1.697,0L10,8.183 l2.651-3.031c0.469-0.469,1.228-0.469,1.697,0s0.469,1.229,0,1.697l-2.758,3.152l2.758,3.15 C14.817,13.62,14.817,14.38,14.348,14.849z" />
     </svg>
     """
+  end
+
+  if Mix.env() == :test do
+    def get_option_id(id, %{id: option_id}), do: "#{id}-option-#{option_id}"
+  else
+    def get_option_id(_, _), do: nil
   end
 
   # TODO: transition animations
