@@ -59,7 +59,7 @@
       style="display: none"
     >
       <!-- dropdown options -->
-      <div class="flex flex-col w-full overflow-y-auto">
+      <div class="flex flex-col w-full overflow-y-auto max-h-64">
         <%= if length(@visible_options) == 0 do %>
           <div class="w-full border-gray-200 border-b">
             <div class="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative">
@@ -70,11 +70,7 @@
           </div>
         <% else %>
           <%= for {option_key, option_val} <- @visible_options do %>
-            <div
-              class="overflow-none"
-              id={"#{@id}-option-#{Map.get(option_val, :id)}"}
-              phx-click={selection_action(option_key, @myself, @id, @multiple)}
-            >
+            <div class="overflow-none shrink-0" id={get_option_id(@id, option_val)} phx-click={selection_action(option_key, @myself, @id, @multiple)}>
               <div class="cursor-pointer w-full border-gray-200 border-b hover:bg-primary-400 hover:text-white">
                 <div class="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative">
                   <div class="w-full items-center flex justify-between">
