@@ -39,8 +39,7 @@ defmodule SearchableSelect do
       |> assign(:placeholder, assigns[:placeholder] || "Search")
       |> assign(:search, "")
       |> assign(:parent_key, assigns.parent_key)
-      |> assign(:selected, :gb_trees.empty())
-      |> assign_selected_list()
+      |> assign(:selected, [])
 
     socket
     |> assign(:visible_options, filter(socket.assigns.options, ""))
@@ -50,13 +49,18 @@ defmodule SearchableSelect do
   @impl true
   def handle_event("pop", %{"key" => key}, %{assigns: assigns} = socket) do
     %{options: options, selected: selected, search: search} = assigns
-    {val, selected} = :gb_trees.take(key, selected)
+
+    {selected, val} =
+      Enum.reduce(selected, {[], nil}, fn
+        {^key, val}, {acc, nil} -> {acc, val}
+        other_selection, {acc, acc_val} -> {[other_selection | acc], acc_val}
+      end)
+
     options = :gb_trees.insert(key, val, options)
 
     socket
     |> assign(:options, options)
-    |> assign(:selected, selected)
-    |> assign_selected_list()
+    |> assign(:selected, Enum.reverse(selected))
     |> update_parent_view()
     |> assign(:visible_options, filter(options, search))
     |> then(&{:noreply, &1})
@@ -86,20 +90,18 @@ defmodule SearchableSelect do
     {val, options} = :gb_trees.take(key, options)
 
     {options, selected} =
-      if !assigns.multiple and :gb_trees.size(selected) == 1 do
-        {key, val, selected} = :gb_trees.take_smallest(selected)
-        options = :gb_trees.insert(key, val, options)
-        {options, selected}
+      if !assigns.multiple and length(selected) == 1 do
+        [{old_key, old_val}] = selected
+        {:gb_trees.insert(old_key, old_val, options), []}
       else
         {options, selected}
       end
 
-    selected = :gb_trees.insert(key, val, selected)
+    selected = selected ++ [{key, val}]
 
     socket
     |> assign(:options, options)
     |> assign(:selected, selected)
-    |> assign_selected_list()
     |> update_parent_view()
     |> assign(:search, "")
     |> assign(:visible_options, filter(options, ""))
@@ -191,22 +193,18 @@ defmodule SearchableSelect do
 
   def filter(:none, acc, _search), do: Enum.reverse(acc)
 
-  def update_parent_view(%{assigns: assigns} = socket) do
-    %{multiple: multiple, parent_key: parent_key, selected: selected} = assigns
-    values = :gb_trees.values(selected)
-
-    if multiple do
-      send(self(), {:select, parent_key, values})
-    else
-      send(self(), {:select, parent_key, List.first(values)})
-    end
+  def update_parent_view(%{assigns: %{multiple: true} = assigns} = socket) do
+    %{parent_key: parent_key, selected: selected} = assigns
+    send(self(), {:select, parent_key, Enum.map(selected, fn {_key, val} -> val end)})
 
     socket
   end
 
-  # makes an easy to iterate list of the selected tree
-  defp assign_selected_list(%{assigns: %{selected: selected}} = socket) do
-    assign(socket, :selected_list, :gb_trees.to_list(selected))
+  def update_parent_view(%{assigns: %{parent_key: parent_key, selected: selected}} = socket) do
+    [{_key, val}] = selected
+    send(self(), {:select, parent_key, val})
+
+    socket
   end
 
   defp normalise_string(string) do
