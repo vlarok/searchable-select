@@ -88,14 +88,14 @@ defmodule SearchableSelect.SearchableSelectTest do
   end
 
   test "pop cross clears selection if multiple=false", %{live: live} do
-    live |> element("#multi-option-1") |> render_click()
-    live |> element("#multi-pop-cross-1") |> render_click()
+    live |> element("#single-option-1") |> render_click()
+    live |> element("#single-pop-cross-1") |> render_click()
 
-    refute has_element?(live, "#multi-pop-cross-1")
-    assert has_element?(live, "#multi-option-1")
+    refute has_element?(live, "#single-pop-cross-1")
+    assert has_element?(live, "#single-option-1")
 
     assert live |> element("#selected-options") |> render() ==
-             "<span id=\"selected-options\">[]</span>"
+             "<span id=\"selected-options\">nil</span>"
   end
 
   defp load_test_view(_) do

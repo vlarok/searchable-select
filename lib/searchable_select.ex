@@ -196,14 +196,16 @@ defmodule SearchableSelect do
   def update_parent_view(%{assigns: %{multiple: true} = assigns} = socket) do
     %{parent_key: parent_key, selected: selected} = assigns
     send(self(), {:select, parent_key, Enum.map(selected, fn {_key, val} -> val end)})
-
     socket
   end
 
-  def update_parent_view(%{assigns: %{parent_key: parent_key, selected: selected}} = socket) do
-    [{_key, val}] = selected
-    send(self(), {:select, parent_key, val})
+  def update_parent_view(%{assigns: %{parent_key: parent_key, selected: []}} = socket) do
+    send(self(), {:select, parent_key, nil})
+    socket
+  end
 
+  def update_parent_view(%{assigns: %{parent_key: parent_key, selected: [{_, val}]}} = socket) do
+    send(self(), {:select, parent_key, val})
     socket
   end
 
