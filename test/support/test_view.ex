@@ -28,6 +28,7 @@ defmodule SearchableSelect.TestView do
 
   defp get_selected_id_list([]), do: "[]"
   defp get_selected_id_list([%{id: id}]), do: "[#{id}]"
+  defp get_selected_id_list(nil), do: "nil"
   defp get_selected_id_list(%{id: id}), do: "#{id}"
   defp get_selected_id_list(selected), do: Enum.map(selected, & &1.id) |> inspect()
 
