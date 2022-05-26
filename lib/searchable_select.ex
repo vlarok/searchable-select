@@ -20,6 +20,9 @@ defmodule SearchableSelect do
   class - Classes to apply to outermost div, defaults to ""
   dropdown - True=selection doesn't persist after click, so behaves like a dropdown instead of a select - optional, defaults to `false`
   id - Component id - required
+  id_key - Map/struct key to use when generating DOM IDs for options - optional, defaults to `:id`.
+    If your maps/structs don't have this field then no DOM IDs will be set. Not needed for the select to function, just included
+    as a testing convenience.
   label_key - Map/struct key to use as label when displaying items - optional, defaults to `:name`
   multiple - True=multiple options may be selected, False=only one option may be select - optional, defaults to `false`
   options - List of maps or structs to use as options - required
@@ -33,6 +36,7 @@ defmodule SearchableSelect do
       |> assign(:class, assigns[:class] || "")
       |> assign(:dropdown, assigns[:dropdown] || false)
       |> assign(:id, assigns.id)
+      |> assign(:id_key, assigns[:id_key] || :id)
       |> assign(:label_key, assigns[:label_key] || :name)
       |> assign(:multiple, assigns[:multiple] || false)
       |> prep_options(assigns)
@@ -112,7 +116,7 @@ defmodule SearchableSelect do
     ~H"""
     <svg
       class="fill-current h-4 w-4 my-auto"
-      id={if Mix.env() == :test, do: "#{@component_id}-pop-cross-#{@selected |> elem(1) |> Map.get(:id)}", else: nil}
+      id={get_pop_cross_id(@component_id, elem(@selected, 1), @id_key)}
       role="button"
       viewBox="0 0 20 20"
       phx-click="pop"
@@ -124,10 +128,19 @@ defmodule SearchableSelect do
     """
   end
 
-  if Mix.env() == :test do
-    def get_option_id(id, %{id: option_id}), do: "#{id}-option-#{option_id}"
-  else
-    def get_option_id(_, _), do: nil
+  # get id_key, component id, selected
+  def get_option_id(component_id, selected, id_key) do
+    case Map.get(selected, id_key) do
+      nil -> nil
+      id -> "#{component_id}-option-#{id}"
+    end
+  end
+
+  def get_pop_cross_id(component_id, selected, id_key) do
+    case Map.get(selected, id_key) do
+      nil -> nil
+      id -> "#{component_id}-pop-cross-#{id}"
+    end
   end
 
   # TODO: transition animations
