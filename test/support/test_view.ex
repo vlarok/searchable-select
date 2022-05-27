@@ -20,6 +20,12 @@ defmodule SearchableSelect.TestView do
   end
 
   @impl true
+  def handle_info({:change_options, options}, socket) do
+    socket
+    |> assign(:options, options)
+    |> then(&{:noreply, &1})
+  end
+
   def handle_info({:select, _items_key, items}, socket) do
     socket
     |> assign(:selected_options, items)
