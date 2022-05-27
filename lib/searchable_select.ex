@@ -30,6 +30,19 @@ defmodule SearchableSelect do
   placeholder - Placeholder for the search input, defaults to "Search"
   """
   @impl true
+  # this is when assigns change after the component is mounted
+  def update(assigns, %{assigns: %{id: _id}} = socket) do
+    socket =
+      socket
+      |> assign(:search, "")
+      |> prep_options(assigns)
+
+    socket
+    |> assign(:visible_options, filter(socket.assigns.options, ""))
+    |> then(&{:ok, &1})
+  end
+
+  # this is when the component is mounted
   def update(assigns, socket) do
     socket =
       socket
@@ -166,7 +179,9 @@ defmodule SearchableSelect do
     end
   end
 
-  def prep_options(%{assigns: %{label_key: label_key}} = socket, %{options: options}) do
+  def prep_options(%{assigns: %{label_key: label_key} = assigns} = socket, %{options: options}) do
+    selected = Map.get(assigns, :selected, [])
+
     gb_options =
       Enum.reduce(options, :gb_trees.empty(), fn option, acc ->
         normalised_label =
@@ -175,6 +190,11 @@ defmodule SearchableSelect do
           |> normalise_string()
 
         :gb_trees.insert(normalised_label, option, acc)
+      end)
+
+    gb_options =
+      Enum.reduce(selected, gb_options, fn {key, _}, acc ->
+        :gb_trees.delete_any(key, acc)
       end)
 
     assign(socket, :options, gb_options)

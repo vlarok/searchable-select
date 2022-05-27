@@ -98,6 +98,26 @@ defmodule SearchableSelect.SearchableSelectTest do
              "<span id=\"selected-options\">nil</span>"
   end
 
+  test "view can change available options dynamically without messing up selection", %{live: live} do
+    live |> element("#single-option-2") |> render_click()
+
+    new_options = [
+      %{id: 1, name: "Ayy"},
+      %{id: 2, name: "Bar"},
+      %{id: 3, name: "Foo"}
+    ]
+
+    send(live.pid, {:change_options, new_options})
+
+    assert has_element?(live, "#single-option-1")
+    refute has_element?(live, "#single-option-2")
+    assert has_element?(live, "#single-option-3")
+    refute has_element?(live, "#single-option-4")
+
+    live |> element("#single-pop-cross-2") |> render_click()
+    assert has_element?(live, "#single-option-2")
+  end
+
   defp load_test_view(_) do
     {:ok, live, _html} = live_isolated(conn(:get, "/"), SearchableSelect.TestView)
     %{live: live}
