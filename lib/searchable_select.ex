@@ -18,6 +18,7 @@ defmodule SearchableSelect do
 
   @doc """
   class - Classes to apply to outermost div, defaults to ""
+  disabled - True=component is disabled - optional, defaults to `false`
   dropdown - True=selection doesn't persist after click, so behaves like a dropdown instead of a select - optional, defaults to `false`
   id - Component id - required
   id_key - Map/struct key to use when generating DOM IDs for options - optional, defaults to `:id`.
@@ -47,6 +48,7 @@ defmodule SearchableSelect do
     socket =
       socket
       |> assign(:class, assigns[:class] || "")
+      |> assign(:disabled, assigns[:disabled] || false)
       |> assign(:dropdown, assigns[:dropdown] || false)
       |> assign(:id, assigns.id)
       |> assign(:id_key, assigns[:id_key] || :id)
