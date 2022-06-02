@@ -1,8 +1,8 @@
-<div class={"flex flex-col w-full items-center relative #{@class}"}>
-  <div class="p-1 flex border border-gray-300 bg-white rounded w-full">
+<div class={"flex flex-col w-full items-center relative #{@class} #{if @disabled, do: "cursor-not-allowed", else: ""}"}>
+  <div class={"p-1 flex border border-gray-300 bg-white rounded w-full #{if @disabled, do: "pointer-events-none bg-gray-200 border-gray-300 text-gray-400", else: ""}"}>
     <div class="flex flex-auto flex-wrap align-middle items-center">
       <%= if @multiple do %>
-        <!-- selection pills -->
+        <%# selection pills %>
         <%= for {_, selected_val} = selected <- @selected do %>
           <div class="flex justify-center items-center m-1 font-medium py-1 px-1 bg-white rounded bg-gray-100 border">
             <div class="text-xs font-normal leading-none max-w-full flex-initial">
@@ -23,6 +23,7 @@
         <input
           placeholder={if !@multiple and length(@selected) > 0, do: "", else: @placeholder}
           class="bg-transparent py-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
+          {if @disabled, do: [disabled: ""], else: []}
           id={"#{@id}-search"}
           phx-click={show_dropdown(%JS{}, @id)}
           phx-keyup={JS.push("search", target: @myself) |> show_dropdown(@id)}
@@ -34,7 +35,7 @@
     <%= unless @multiple or @selected == [] do %>
       <.pop_cross component_id={@id} id_key={@id_key} selected={List.first(@selected)} target={@myself} />
     <% end %>
-    <!-- dropdown caret -->
+    <%# dropdown caret %>
     <div class="text-gray-300 w-8 py-1 pl-2 pr-1 flex items-center">
       <svg
         version="1.1"
@@ -58,13 +59,17 @@
       phx-key="escape"
       style="display: none"
     >
-      <!-- dropdown options -->
+      <%# dropdown options %>
       <div class="flex flex-col w-full overflow-y-auto max-h-64">
         <%= if length(@visible_options) == 0 do %>
           <div class="w-full border-gray-200 border-b">
             <div class="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative">
               <div class="w-full items-center flex justify-between">
-                Sorry, no matching options.
+                <%= if String.trim(@search) == "" do %>
+                  No more options.
+                <% else %>
+                  Sorry, no matching options.
+                <% end %>
               </div>
             </div>
           </div>
