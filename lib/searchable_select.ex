@@ -30,12 +30,12 @@ defmodule SearchableSelect do
   id_key - Map/struct key to use when generating DOM IDs for options - optional, defaults to `:id`.
     If your maps/structs don't have this field then no DOM IDs will be set. Not needed for the select to function, just included
     as a testing convenience.
-  label_callback - Map/struct key to use as label when displaying items - optional, defaults to `:name`
+  label_callback - Function used to populate label when displaying items. Defaults to `fn item -> item.name end`
   multiple - True=multiple options may be selected, False=only one option may be select - optional, defaults to `false`
   options - List of maps or structs to use as options - required
   parent_key - Key to send to parent view when options are selected/unselected - required unless form is set
   placeholder - Placeholder for the search input, defaults to "Search"
-  value_callback - Function used to populate the hidden input when form is set. Defaults to `fn selected -> selected.id end`
+  value_callback - Function used to populate the hidden input when form is set. Defaults to `fn item -> item.id end`
   """
   @impl true
   # this is when assigns change after the component is mounted
@@ -65,7 +65,6 @@ defmodule SearchableSelect do
       |> assign(:multiple, assigns[:multiple] || false)
       |> prep_options(assigns)
       |> assign(:placeholder, assigns[:placeholder] || "Search")
-      |> assign(:phx_target, assigns[:"phx-target"])
       |> assign(:search, "")
       |> assign(:parent_key, assigns[:parent_key])
       |> assign(:selected, [])
