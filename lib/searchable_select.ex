@@ -5,10 +5,14 @@ defmodule SearchableSelect do
   Your view will need to implement a callback like this:
   `handle_info({:select, parent_key, selected}, socket)`
 
+  Alternatively you can use it as part of a normal Phoenix HTML form by setting form and field
+  assigns, and an optional callback for getting the value of each struct.
+
   For multiple selects, selected will be a list of selected structs/maps
   For single selects, selected will be a struct/map
   """
   use Phoenix.LiveComponent
+  alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
 
   @impl true
@@ -20,15 +24,18 @@ defmodule SearchableSelect do
   class - Classes to apply to outermost div, defaults to ""
   disabled - True=component is disabled - optional, defaults to `false`
   dropdown - True=selection doesn't persist after click, so behaves like a dropdown instead of a select - optional, defaults to `false`
+  field - Field name to use as part of form, required if form is set
+  form - Phoenix.HTML.Form, optional, if set will make searchable select return values via a hidden input instead of handle_info
   id - Component id - required
   id_key - Map/struct key to use when generating DOM IDs for options - optional, defaults to `:id`.
     If your maps/structs don't have this field then no DOM IDs will be set. Not needed for the select to function, just included
     as a testing convenience.
-  label_key - Map/struct key to use as label when displaying items - optional, defaults to `:name`
+  label_callback - Function used to populate label when displaying items. Defaults to `fn item -> item.name end`
   multiple - True=multiple options may be selected, False=only one option may be select - optional, defaults to `false`
   options - List of maps or structs to use as options - required
-  parent_key - Key to send to parent view when options are selected/unselected - required
+  parent_key - Key to send to parent view when options are selected/unselected - required unless form is set
   placeholder - Placeholder for the search input, defaults to "Search"
+  value_callback - Function used to populate the hidden input when form is set. Defaults to `fn item -> item.id end`
   """
   @impl true
   # this is when assigns change after the component is mounted
@@ -50,15 +57,18 @@ defmodule SearchableSelect do
       |> assign(:class, assigns[:class] || "")
       |> assign(:disabled, assigns[:disabled] || false)
       |> assign(:dropdown, assigns[:dropdown] || false)
+      |> assign(:field, assigns[:field])
+      |> assign(:form, assigns[:form])
       |> assign(:id, assigns.id)
       |> assign(:id_key, assigns[:id_key] || :id)
-      |> assign(:label_key, assigns[:label_key] || :name)
+      |> assign(:label_callback, assigns[:label_callback] || fn item -> item.name end)
       |> assign(:multiple, assigns[:multiple] || false)
       |> prep_options(assigns)
       |> assign(:placeholder, assigns[:placeholder] || "Search")
       |> assign(:search, "")
-      |> assign(:parent_key, assigns.parent_key)
+      |> assign(:parent_key, assigns[:parent_key])
       |> assign(:selected, [])
+      |> assign(:value_callback, assigns[:value_callback] || fn item -> item.id end)
 
     socket
     |> assign(:visible_options, filter(socket.assigns.options, ""))
@@ -121,9 +131,9 @@ defmodule SearchableSelect do
     socket
     |> assign(:options, options)
     |> assign(:selected, selected)
-    |> update_parent_view()
     |> assign(:search, "")
     |> assign(:visible_options, filter(options, ""))
+    |> update_parent_view()
     |> then(&{:noreply, &1})
   end
 
@@ -181,16 +191,12 @@ defmodule SearchableSelect do
     end
   end
 
-  def prep_options(%{assigns: %{label_key: label_key} = assigns} = socket, %{options: options}) do
+  def prep_options(%{assigns: assigns} = socket, %{options: options}) do
     selected = Map.get(assigns, :selected, [])
 
     gb_options =
       Enum.reduce(options, :gb_trees.empty(), fn option, acc ->
-        normalised_label =
-          option
-          |> Map.get(label_key)
-          |> normalise_string()
-
+        normalised_label = assigns.label_callback.(option) |> normalise_string()
         :gb_trees.insert(normalised_label, option, acc)
       end)
 
@@ -228,6 +234,10 @@ defmodule SearchableSelect do
 
   def filter(:none, acc, _search), do: Enum.reverse(acc)
 
+  def update_parent_view(%{assigns: %{form: form, id: id}} = socket) when form != nil do
+    push_event(socket, "searchable_select", %{id: get_hook_id(id)})
+  end
+
   def update_parent_view(%{assigns: %{multiple: true} = assigns} = socket) do
     %{parent_key: parent_key, selected: selected} = assigns
     send(self(), {:select, parent_key, Enum.map(selected, fn {_key, val} -> val end)})
@@ -243,6 +253,21 @@ defmodule SearchableSelect do
     send(self(), {:select, parent_key, val})
     socket
   end
+
+  def hidden_form_input(%{selected_val: selected_val, value_callback: value_callback} = assigns) do
+    assigns = assign(assigns, :value, value_callback.(selected_val))
+
+    ~H"""
+    <input
+      id={if @multiple, do: Form.input_id(@form, @field, @value), else: Form.input_id(@form, @field)}
+      name={Form.input_name(@form, @field) <> if @multiple, do: "[]", else: ""}
+      type="hidden"
+      value={@value}
+    />
+    """
+  end
+
+  defp get_hook_id(id), do: id <> "-form-hook"
 
   defp normalise_string(string) do
     string

@@ -62,6 +62,23 @@ defmodule SearchableSelect.TestView do
       parent_key="selected_options"
     />
     <span id="selected-options"><%= get_selected_id_list(@selected_options) %></span>
+    <.form for={:test} let={f} as={:test}>
+      <.live_component
+        field={:single_select}
+        form={f}
+        id="single_form"
+        module={SearchableSelect}
+        options={@options}
+      />
+      <.live_component
+        field={:multi_select}
+        form={f}
+        id="multi_form"
+        module={SearchableSelect}
+        multiple
+        options={@options}
+      />
+    </.form>
     """
   end
 end
