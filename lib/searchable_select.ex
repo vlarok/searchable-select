@@ -33,7 +33,7 @@ defmodule SearchableSelect do
   label_callback - Map/struct key to use as label when displaying items - optional, defaults to `:name`
   multiple - True=multiple options may be selected, False=only one option may be select - optional, defaults to `false`
   options - List of maps or structs to use as options - required
-  parent_key - Key to send to parent view when options are selected/unselected - required
+  parent_key - Key to send to parent view when options are selected/unselected - required unless form is set
   placeholder - Placeholder for the search input, defaults to "Search"
   value_callback - Function used to populate the hidden input when form is set. Defaults to `fn selected -> selected.id end`
   """
@@ -67,7 +67,7 @@ defmodule SearchableSelect do
       |> assign(:placeholder, assigns[:placeholder] || "Search")
       |> assign(:phx_target, assigns[:"phx-target"])
       |> assign(:search, "")
-      |> assign(:parent_key, assigns.parent_key)
+      |> assign(:parent_key, assigns[:parent_key])
       |> assign(:selected, [])
       |> assign(:value_callback, assigns[:value_callback] || fn item -> item.id end)
 
@@ -132,9 +132,9 @@ defmodule SearchableSelect do
     socket
     |> assign(:options, options)
     |> assign(:selected, selected)
-    |> update_parent_view()
     |> assign(:search, "")
     |> assign(:visible_options, filter(options, ""))
+    |> update_parent_view()
     |> then(&{:noreply, &1})
   end
 
@@ -235,8 +235,8 @@ defmodule SearchableSelect do
 
   def filter(:none, acc, _search), do: Enum.reverse(acc)
 
-  def update_parent_view(%{assigns: %{form: form}} = socket) when form != nil do
-    socket
+  def update_parent_view(%{assigns: %{form: form, id: id}} = socket) when form != nil do
+    push_event(socket, "searchable_select", %{id: get_hook_id(id)})
   end
 
   def update_parent_view(%{assigns: %{multiple: true} = assigns} = socket) do
@@ -255,12 +255,20 @@ defmodule SearchableSelect do
     socket
   end
 
-  def set_value(selected, value_callback, true) do
-    Enum.map(selected, fn {_key, val} -> value_callback.(val) end)
+  def hidden_form_input(%{selected_val: selected_val, value_callback: value_callback} = assigns) do
+    assigns = assign(assigns, :value, value_callback.(selected_val))
+
+    ~H"""
+    <input
+      id={if @multiple, do: Form.input_id(@form, @field, @value), else: Form.input_id(@form, @field)}
+      name={Form.input_name(@form, @field) <> if @multiple, do: "[]", else: ""}
+      type="hidden"
+      value={@value}
+    />
+    """
   end
 
-  def set_value([{_, selected}], value_callback, false), do: value_callback.(selected)
-  def set_value([], _value_callback, false), do: nil
+  defp get_hook_id(id), do: id <> "-form-hook"
 
   defp normalise_string(string) do
     string
