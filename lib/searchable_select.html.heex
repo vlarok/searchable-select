@@ -1,5 +1,5 @@
 <div class={"flex flex-col w-full items-center relative #{@class} #{if @disabled, do: "cursor-not-allowed", else: ""}"}>
-  <div class={"p-1 flex border border-gray-300 bg-white rounded-none w-full #{if @disabled, do: "pointer-events-none bg-gray-200 border-gray-300 text-gray-400", else: ""}"}>
+  <div class={"flex border border-gray-300 bg-white rounded-none w-full #{if @disabled, do: "pointer-events-none bg-gray-200 border-gray-300 text-gray-400", else: ""}"}>
     <div class="p-2 flex flex-auto flex-wrap align-middle items-center">
       <%= if @multiple do %>
         <%# selection pills %>
@@ -13,7 +13,7 @@
         <% end %>
       <% else %>
         <%= unless @selected == [] do %>
-          <span class="py-1 px-2">
+          <span>
             <%= @label_callback.(elem(hd(@selected), 1)) %>
           </span>
         <% end %>
@@ -46,18 +46,7 @@
       <.pop_cross component_id={@id} id_key={@id_key} selected={List.first(@selected)} target={@myself} />
     <% end %>
     <%# dropdown caret %>
-    <div class="text-gray-300 w-8 py-1 pl-2 pr-1 flex items-center">
-      <svg
-        version="1.1"
-        id={"#{@id}-caret"}
-        phx-click={toggle_dropdown(@id)}
-        class="fill-current h-4 w-4 my-auto text-black"
-        role="button"
-        viewBox="0 0 20 20"
-      >
-        <path d="M17.418,6.109c0.272-0.268,0.709-0.268,0.979,0s0.271,0.701,0,0.969l-7.908,7.83 c-0.27,0.268-0.707,0.268-0.979,0l-7.908-7.83c-0.27-0.268-0.27-0.701,0-0.969c0.271-0.268,0.709-0.268,0.979,0L10,13.25 L17.418,6.109z" />
-      </svg>
-    </div>
+
   </div>
 
   <div class="w-full px-4">
@@ -86,7 +75,7 @@
         <% else %>
           <%= for {option_key, option_val} <- @visible_options do %>
             <div class="overflow-none shrink-0" id={get_option_id(@id, option_val, @id_key)} phx-click={selection_action(option_key, @myself, @id, @multiple)}>
-              <div class="cursor-pointer w-full border-gray-200 border-b hover:bg-primary-400 hover:text-white">
+              <div class="cursor-pointer w-full border-gray-200 border-b hover:bg-primary-400 focus:border-purple-500">
                 <div class="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative">
                   <div class="w-full items-center flex justify-between">
                     <%= @label_callback.(option_val) %>

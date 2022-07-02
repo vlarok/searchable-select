@@ -139,17 +139,21 @@ defmodule SearchableSelect do
 
   def pop_cross(assigns) do
     ~H"""
-    <svg
-      class="fill-current h-4 w-4 my-auto"
-      id={get_pop_cross_id(@component_id, elem(@selected, 1), @id_key)}
-      role="button"
+    <span class="inline-flex items-center px-3 rounded-none text-gray-500 text-sm">
+      <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="inline-flex text-gray-400 group-hover:text-gray-500 mr-0 flex-shrink-0 h-5 w-5"
       viewBox="0 0 20 20"
-      phx-click="pop"
-      phx-value-key={elem(@selected, 0)}
-      phx-target={@target}
-    >
-      <path d="M14.348,14.849c-0.469,0.469-1.229,0.469-1.697,0L10,11.819l-2.651,3.029c-0.469,0.469-1.229,0.469-1.697,0 c-0.469-0.469-0.469-1.229,0-1.697l2.758-3.15L5.651,6.849c-0.469-0.469-0.469-1.228,0-1.697s1.228-0.469,1.697,0L10,8.183 l2.651-3.031c0.469-0.469,1.228-0.469,1.697,0s0.469,1.229,0,1.697l-2.758,3.152l2.758,3.15 C14.817,13.62,14.817,14.38,14.348,14.849z" />
-    </svg>
+        fill="currentColor"
+        id={get_pop_cross_id(@component_id, elem(@selected, 1), @id_key)}
+        role="button"
+        phx-click="pop"
+        phx-value-key={elem(@selected, 0)}
+        phx-target={@target}
+        >
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+      </svg>
+    </span>
     """
   end
 
