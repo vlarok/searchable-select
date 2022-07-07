@@ -67,7 +67,7 @@ defmodule SearchableSelect do
       |> assign(:placeholder, assigns[:placeholder] || "Search")
       |> assign(:search, "")
       |> assign(:parent_key, assigns[:parent_key])
-      |> assign(:selected, [])
+      |> assign(:selected, assigns[:selected] || [])
       |> assign(:value_callback, assigns[:value_callback] || fn item -> item.id end)
 
     socket
@@ -85,7 +85,11 @@ defmodule SearchableSelect do
         other_selection, {acc, acc_val} -> {[other_selection | acc], acc_val}
       end)
 
+   if key != "" do
     options = :gb_trees.insert(key, val, options)
+   end
+
+
 
     socket
     |> assign(:options, options)
@@ -135,6 +139,10 @@ defmodule SearchableSelect do
     |> assign(:visible_options, filter(options, ""))
     |> update_parent_view()
     |> then(&{:noreply, &1})
+  end
+
+  def handle_event(_, _, socket) do
+    {:noreply, socket}
   end
 
   def pop_cross(assigns) do
