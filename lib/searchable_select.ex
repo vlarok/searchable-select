@@ -43,6 +43,7 @@ defmodule SearchableSelect do
     socket =
       socket
       |> assign(:search, "")
+      |> assign(:callback, "Nupp lisa")
       |> prep_options(assigns)
 
     socket
@@ -65,6 +66,7 @@ defmodule SearchableSelect do
       |> assign(:multiple, assigns[:multiple] || false)
       |> prep_options(assigns)
       |> assign(:placeholder, assigns[:placeholder] || "Search")
+      |> assign(:add_new, assigns[:add_new] || false)
       |> assign(:search, "")
       |> assign(:parent_key, assigns[:parent_key])
       |> assign(:selected, assigns[:selected] || [])
